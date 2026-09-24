@@ -1,0 +1,15 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{Resumen Ejecutivo}{\es@scroman {i}}{Doc-Start}%
+\contentsline {section}{\numberline {1}Introducción General}{1}{section.1}%
+\contentsline {section}{\numberline {2}Sección de Supuestos}{1}{section.2}%
+\contentsline {section}{\numberline {3}Situación Inicial}{1}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Pregunta 1.a: Generación de Parámetros y Perfiles de Instancia}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Pregunta 1.b: Formulación Matemática del Modelo de Optimización}{2}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Pregunta 1.c: Análisis de la Naturaleza del Problema, Solver y Resolución}{3}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Pregunta 1.d: Interpretación de Resultados, Orden de Mérito y Reserva}{4}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Variaciones}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Pregunta 2.a: Incorporación de un Sistema de Almacenamiento (Batería BESS)}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Pregunta 2.b: Respuesta de la Demanda (Carga Interrumpible)}{6}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Pregunta 2.c: Costo Fijo por Sobrepasar un Umbral Diario de Emisiones}{7}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Conclusiones}{8}{section.5}%
+\contentsline {section}{\numberline {A}Anexo: Tablas de Datos Horarios y Verificación Numérica}{10}{appendix.A}%
