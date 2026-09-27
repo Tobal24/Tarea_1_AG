@@ -56,36 +56,29 @@
 \begin{titlepage}
     \centering
     \vspace*{0.8cm}
-    {\scshape\Large Universidad Técnica Federico Santa María \par}
-    {\scshape\large Departamento de Industrias -- Casa Central / Campus San Joaquín \par}
-    \vspace{0.3cm}
-    {\large Asignatura: Investigación de Operaciones (ILN250) -- Segundo Semestre 2026 \par}
+    {\large Investigación de Operaciones (ILN250)\par}
     \vspace{2.0cm}
     
     \rule{\linewidth}{1.2pt} \\[0.4cm]
-    {\huge\bfseries\color{usmblue} Tarea Computacional 1: \\[0.25cm] 
-    Optimización del Unit Commitment y Despacho Económico en un Complejo Industrial Aislado \par}
+    {\huge\bfseries\color{usmblue} Tarea Computacional 1: \\[0.25cm]}
     \rule{\linewidth}{1.2pt} \\[2.0cm]
     
     \begin{minipage}[t]{0.48\textwidth}
-        \textbf{Profesores:}\\
-        Nicolás Boyardi A.\\
+        \textbf{Profesor:}\\
         Rafael Favereau U.\\
-        Ismael Kauak V.
     \end{minipage}
     \hfill
     \begin{minipage}[t]{0.48\textwidth}
         \raggedleft
-        \textbf{Integrantes y Semillas:}\\
-        Integrante 1: Semilla RNG = \textbf{392}\\
-        Integrante 2: Semilla RNG = \textbf{142}\\[0.2cm]
-        \textbf{Semilla Oficial de Grupo:}\\
+        \textbf{Integrantes:}\\
+        Cristobal Cortés\\
+        Luciano Ferroni\\[0.2cm]
+        \textbf{Semilla de Grupo:}\\
         $392 + 142 =$ \textbf{534}\\[0.2cm]
-        \textit{Carrera de Ingeniería Civil Industrial}
     \end{minipage}
     
     \vfill
-    {\large Valparaíso / Santiago, Chile \\ Septiembre de 2026 \par}
+    {\large Valparaíso, Chile \\ Septiembre de 2026 \par}
 \end{titlepage}
 
 % =========================================================================
@@ -97,14 +90,14 @@
 \section*{Resumen Ejecutivo}
 \addcontentsline{toc}{section}{Resumen Ejecutivo}
 
-El presente informe aborda el modelamiento, resolución computacional y análisis microeconómico del problema de \textit{Unit Commitment} (UC) y Despacho Económico para un complejo industrial eléctricamente aislado durante un horizonte temporal semanal de $T = 168$ horas. Conforme a las instrucciones del curso y la regla de conformación de grupos, se utiliza la **Semilla Oficial de Grupo 534**, resultante de la adición de las semillas asignadas a los integrantes ($392 + 142 = 534$).
+El presente informe aborda el modelamiento, resolución computacional y análisis del problema de \textit{Unit Commitment} (UC) y Despacho para un complejo industrial eléctricamente aislado durante un horizonte temporal semanal de 168 horas.
 
-La micro-red cuenta con un parque de generación térmica heterogéneo $|G| = 5$ (dos unidades a gas de base, dos grupos diésel de modulación intermedia y una turbina peaker de punta) junto a un enlace limitado con el mercado eléctrico externo ($\bar{G}_{red} = 80$ MW) sujeto a precios horarios volátiles $\lambda_t$. El problema se formula como un Programa Lineal Entero Mixto (\textit{Mixed-Integer Linear Programming}, MILP), integrando costos de generación, arranque (\textit{startup}), costos fijos de operación en vacío (\textit{no-load}), dinámicas de rampa horaria con excepciones al arranque/parada, y reserva operativa rodante mínima del 10\% de la demanda. La implementación se llevó a cabo en Python con \textbf{Pyomo}, resolviéndose mediante el solver \textbf{HiGHS} (\texttt{appsi\_highs}), alcanzando la solución óptima global probada (gap de 0,00\%) en 0,81 segundos.
+La micro-red cuenta con un parque de generación térmica heterogéneo $|G| = 5$ (dos unidades a gas de base, dos grupos diésel de modulación intermedia y una turbina peaker de punta) junto a un enlace limitado con el mercado eléctrico externo ($\bar{G}_{red} = 80$ MW) sujeto a precios horarios volátiles $\lambda_t$. El problema se formula como un Programa Lineal Entero Mixto \textit{MILP}, integrando costos de generación, arranque (\textit{start}), costos fijos de operación (\textit{no-load}), dinámicas de rampa horaria con excepciones al arranque/parada, y reserva operativa del 10\% de la demanda. La implementación se llevó a cabo en Python con \textbf{Pyomo}, resolviéndose mediante el solver \textbf{HiGHS} (\texttt{appsi\_highs}), para entontrar la solución óptima global.
 
 Los principales hallazgos del estudio comprenden:
 \begin{enumerate}
     \item \textbf{Situación Inicial (Caso Base):} El costo total de operación semanal asciende a \textbf{\$1.776.019.094,00 CLP}. La estructura de costos se desglosa en: 93,73\% por costos variables de generación (\$1.664.741.000 CLP), 5,63\% por costos de no-load (\$100.060.000 CLP), 0,44\% por partidas térmicas (\$7.800.000 CLP) y 0,19\% por importación de red (\$3.418.094 CLP). El orden de mérito económico demuestra que las unidades a gas (\texttt{Gas\_Base\_1} y \texttt{Gas\_Base\_2}) absorben la base con factores de planta del 95,9\% y 72,7\%, respectivamente. La unidad \texttt{Diesel\_Med\_1} modula la carga diurna laboral (FP 23,6\%, 5 arranques), mientras que \texttt{Diesel\_Med\_2} y \texttt{Peaker} se reservan exclusivamente para los picos extremos de demanda ($FP \le 0,5\%$). La importación de red es muy reducida (18,0 MWh en 6 horas), confirmando que la red se emplea únicamente como respaldo de confiabilidad ante restricciones de rampa y reserva en horas punta.
-    \item \textbf{Variación 2.a (Sistema BESS):} La incorporación de un sistema de almacenamiento de energía mediante baterías (BESS) de 200 MWh / 60 MW genera un ahorro económico neto de \textbf{\$43.973.254,66 CLP semanal (2,48\% de reducción)}, alcanzando un costo de \$1.732.045.839,34 CLP. La batería realiza arbitraje de energía intradiario (\textit{peak shaving} y \textit{valley filling}), almacenando 1.225,5 MWh nocturnos e inyectando 1.106,0 MWh en horas punta. La batería **elimina en un 100\% las importaciones de la red externa** (0 MWh) y suprime totalmente los arranques de las unidades más costosas (\texttt{Diesel\_Med\_2} y \texttt{Peaker}).
+    \item \textbf{Variación 2.a (Sistema con Batería):} La incorporación de un sistema de almacenamiento de energía genera un ahorro económico neto de \textbf{\$43.973.254,66 CLP semanal (2,48\% de reducción)}, alcanzando un costo de \$1.732.045.839,34 CLP. La batería es capaz de almacenar 1.225,5 MWh nocturnos e inyectar 1.106,0 MWh en horas punta. La batería **elimina en un 100\% las importaciones de la red externa** (0 MWh) y suprime totalmente los arranques de las unidades más costosas (\texttt{Diesel\_Med\_2} y \texttt{Peaker}).
     \item \textbf{Variación 2.b (Respuesta de Demanda):} El análisis paramétrico de sensibilidad respecto al costo de interrupción $c^{shed}$ reveló un umbral económico crítico exacto de \textbf{\$200.000 CLP/MWh}. A partir de este valor, el recorte se anula por completo ($r_{total} = 0$ MWh). Este umbral coincide con el costo marginal máximo de importación de la red externa durante el peak vespertino, ratificando analíticamente los principios de formación de precios y despacho marginal.
     \item \textbf{Variación 2.c (Umbral de Emisiones con Big-M):} Frente a una penalización fija diaria $F$ por superar 1.500 $\text{tCO}_2$, se identificó que en el caso base los días sábado y domingo ya cumplen naturalmente con el umbral ($1.483,8$ y $1.487,2\text{ tCO}_2$). En días laborales, abatir las emisiones exige importar al máximo técnico de la red (80 MW las 24 horas), lo que impone un sobrecosto superior a \$108 millones CLP diarios por día hábil. En consecuencia, el sistema reduce a 2 días infractores recién a $F = \$100.000.000$ CLP/día y alcanza 0 días sobre el umbral a $F \ge \$120.000.000$ CLP/día, disparando el costo operativo semanal en más de \$500 millones CLP, demostrando la distorsión económica que introducen las sanciones de tipo umbral discontinuo frente a tributos continuos al carbono.
 \end{enumerate}
@@ -113,43 +106,38 @@ Los principales hallazgos del estudio comprenden:
 \tableofcontents
 \newpage
 
-% =========================================================================
-% MAIN BODY: PÁGINAS 1 A 10 (ESTRICTAMENTE <= 10 PÁGINAS)
-% =========================================================================
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
 \section{Introducción General}
 \label{sec:introduccion}
 
-La gestión eficiente de micro-redes y complejos industriales aislados representa uno de los desafíos más relevantes de la ingeniería de operaciones contemporánea. A diferencia de las instalaciones conectadas de manera irrestricta al Sistema Eléctrico Nacional, un sistema aislado debe asegurar el autoabastecimiento instantáneo de su demanda eléctrica garantizando la seguridad, estabilidad de frecuencia y continuidad de servicio, en un entorno caracterizado por la variabilidad estocástica del consumo y las rigideces técnicas del parque generador \cite{stoft2002power,kirschen2003fundamentals}.
-
 El problema abordado en esta investigación corresponde a la planificación operativa semanal ($T = 168$ horas) de un complejo industrial aislado provisto de un parque térmico heterogéneo de cinco unidades ($|G| = 5$) y un enlace de capacidad acotada ($\bar{G}_{red} = 80$ MW) con el mercado eléctrico externo. La optimización del despacho requiere resolver simultáneamente dos decisiones interdependientes:
 \begin{enumerate}
-    \item \textbf{Unit Commitment (Decisión Binaria):} Determinar qué unidades generadoras deben encenderse, mantenerse en línea o apagarse en cada intervalo horario, incurriendo en costos fijos de operación (\textit{no-load}) y costos de arranque (\textit{startup}) dependientes del historial de operación previo \cite{carrion2006computationally}.
-    \item \textbf{Despacho Económico (Decisión Continua):} Asignar la potencia exacta generada por cada unidad en servicio y la cantidad de energía importada desde la red externa a precio horario $\lambda_t$, satisfaciendo el balance instantáneo de energía, límites de capacidad técnica, restricciones de velocidad de cambio de carga (rampas de subida y bajada) y márgenes de reserva operativa ante contingencias \cite{morales2013tight,arroyo2000optimal}.
+    \item \textbf{Unit Commitment (Decisión Binaria):} Determinar qué unidades generadoras deben encenderse, mantenerse en línea o apagarse en cada intervalo horario, incurriendo en costos fijos de operación (\textit{no-load}) y costos de arranque (\textit{startup}).
+    \item \textbf{Despacho Económico (Decisión Continua):} Asignar la potencia generada por cada unidad en servicio y la cantidad de energía importada desde la red externa a precio horario $\lambda_t$, satisfaciendo el balance instantáneo de energía, límites de capacidad técnica, restricciones de velocidad de cambio de carga (rampas de subida y bajada) y márgenes de reserva operativa ante contingencias.
 \end{enumerate}
 
-El objetivo central del presente estudio es formular el modelo matemático óptimo para el caso base, resolverlo computacionalmente mediante herramientas de programación matemática en Python (Pyomo + HiGHS) para la **Semilla de Grupo 534** ($392 + 142 = 534$), e investigar cuantitativamente el impacto de tres variaciones tecnológicas y regulatorias: (i) almacenamiento electroquímico BESS, (ii) respuesta de demanda con carga interrumpible, y (iii) una política ambiental con penalización fija diaria tipo Big-M por sobrepasar un umbral de emisiones de $\text{CO}_2$.
+El objetivo central del presente estudio es formular el modelo matemático óptimo para el caso base, resolverlo computacionalmente mediante herramientas de programación matemática en Python (Pyomo), e investigar cuantitativamente el impacto de tres variaciones tecnológicas y regulatorias: (i) almacenamiento de energía, (ii) respuesta de demanda con carga interrumpible, y (iii) una política ambiental con penalización fija diariapor sobrepasar un umbral de emisiones de $\text{CO}_2$.
 
-\section{Sección de Supuestos}
+\section{Supuestos}
 \label{sec:supuestos}
 
 Para garantizar un modelamiento matemáticamente riguroso, consistente y computacionalmente tratable, se establecen los siguientes supuestos operativos:
 
 \begin{enumerate}
     \item \textbf{Discretización Temporal y Régimen Cuasi-Estacionario:} El horizonte semanal se discretiza en 168 bloques horarios independientes de $\Delta t = 1$ hora. La potencia promedio en MW durante una hora equivale numéricamente a la energía entregada en MWh. Las variables representan el estado promedio en cada bloque horario.
-    \item \textbf{Estructura de Costos Térmicos:} Los costos de operación se modelan de acuerdo al estándar de la industria eléctrica mediante tres componentes lineales e independientes:
+    \item \textbf{Estructura de Costos Térmicos:} Los costos de operación se separan en tres componentes:
     \begin{itemize}
-        \item \textit{Costo Variable ($c_g^{var}$):} Costo proporcional a la energía eléctrica generada [CLP/MWh], que agrupa combustible y mantenimiento variable.
-        \item \textit{Costo de No-Load ($c_g^{nl}$):} Costo fijo horario [CLP/h] en el que incurre cada generador por mantenerse encendido y sincronizado a la red a velocidad nominal, independiente de su nivel de despacho.
-        \item \textit{Costo de Arranque ($c_g^{start}$):} Costo monetario fijo devengado únicamente en el instante en que la unidad transita de apagado ($u_{g,t-1}=0$) a encendido ($u_{g,t}=1$). El costo de detención se asume nulo ($c_g^{stop} = 0$).
+        \item \textit{Costo Variable ($c_g^{var}$):} Costo proporcional a la energía eléctrica generada [CLP/MWh].
+        \item \textit{Costo de No-Load ($c_g^{nl}$):} Costo fijo horario [CLP/h] en el que incurre cada generador por mantenerse encendido, independiente de su nivel de despacho.
+        \item \textit{Costo de Arranque ($c_g^{start}$):} Costo monetario fijo por encender un generador. El costo de detención se asume nulo ($c_g^{stop} = 0$).
     \end{itemize}
-    \item \textbf{Dinámica de Rampas y Ajuste al Arranque/Parada:} Las limitaciones termomecánicas restringen las variaciones de potencia a un máximo de $R_g$ MW/h entre horas consecutivas en línea. Conforme a las directrices de cátedra (FAQ), cuando la unidad arranca, puede alcanzar hasta $\max(P_g^{min}, R_g)$ MW para no restringir artificialmente a unidades con $R_g > P_g^{min}$ (ej. diésel y peaker) ni provocar infactibilidad en unidades donde $P_g^{min} > R_g$ (como las turbinas a gas). Análogamente, antes de apagarse, la unidad desciende a lo más hasta dicho umbral.
+    \item \textbf{Dinámica de Rampas y Ajuste al Arranque/Parada:} Se restringen las variaciones de potencia a un máximo de $R_g$ MW/h entre horas consecutivas. Cuando la unidad arranca, puede alcanzar hasta $\max(P_g^{min}, R_g)$ MW para no restringir artificialmente a unidades con $R_g > P_g^{min}$ (ej. diésel y peaker) ni provocar infactibilidad en unidades donde $P_g^{min} > R_g$ (como las turbinas a gas). Análogamente, antes de apagarse, la unidad desciende a lo más hasta dicho umbral.
     \item \textbf{Condiciones Iniciales del Sistema ($t=0$):} Se establece que las dos unidades de base (\texttt{Gas\_Base\_1} y \texttt{Gas\_Base\_2}) inician encendidas a su mínimo técnico ($u_g^0 = 1$, $p_g^0 = P_g^{min}$), mientras que las unidades intermedias y peaker inician apagadas ($u_g^0 = 0$, $p_g^0 = 0$). Estas condiciones gobiernan los arranques y rampas de la hora $t=1$.
-    \item \textbf{Reserva Operativa y Seguridad de Suministro:} Para salvaguardar la micro-red ante contingencias, se exige en todo momento una reserva mínima $Res_t = \lfloor 0.10 \cdot d_t \rceil$, provista conjuntamente por la capacidad disponible no despachada de máquinas encendidas y la holgura del enlace de red ($\bar{G}_{red} - g_t^{red}$).
+    \item \textbf{Reserva Operativa y Seguridad de Suministro:} Por seguridad, se exige en todo momento una reserva mínima $Res_t = \lfloor 0.10 \cdot d_t \rceil$, provista conjuntamente por la capacidad disponible no despachada de máquinas encendidas y la holgura del enlace de red ($\bar{G}_{red} - g_t^{red}$).
     \item \textbf{Operación de Almacenamiento (BESS):} Se asume eficiencia de carga $\eta^{ch} = 0.95$ y descarga $\eta^{dis} = 0.95$. Dado que los costos marginales de generación y precios de red son estrictamente positivos, la optimización económica descarta de forma natural la carga y descarga simultánea sin requerir variables binarias adicionales.
-    \item \textbf{Perímetro de Emisiones:} El umbral de $1.500 \text{ tCO}_2$/día aplica exclusivamente a las emisiones directas del parque térmico local del complejo.
+    \item \textbf{Perímetro de Emisiones:} El umbral de $1.500 \text{ tCO}_2$/día aplica exclusivamente a las emisiones directas del complejo.
 \end{enumerate}
 
 \section{Situación Inicial}
@@ -158,7 +146,7 @@ Para garantizar un modelamiento matemáticamente riguroso, consistente y computa
 \subsection{Pregunta 1.a: Generación de Parámetros y Perfiles de Instancia}
 \label{subsec:1a}
 
-La demanda horaria $d_t$ y el precio de red $\lambda_t$ se obtuvieron mediante el generador estocástico parametrizado con la **Semilla de Grupo 534**, conforme a las expresiones:
+La demanda horaria $d_t$ y el precio de red $\lambda_t$ se obtuvieron mediante el generador estocástico parametrizado con la semilla 534 conforme a las expresiones:
 \begin{equation}
     d_t = \left\lfloor P^{peak} \cdot \gamma_{dia(t)} \cdot s_{h(t)} \cdot (1 + \varepsilon_t) \right\rceil, \quad 
     \lambda_t = \left\lfloor (100.000 + 90.000 \cdot s_{h(t)}) \cdot (1 + \eta_t) \right\rceil
@@ -173,31 +161,29 @@ con $P^{peak} \sim \mathcal{N}(300, 15)$, $\gamma_{dia} = 1.0$ (días hábiles $
 \small
 \begin{tabular}{lrrrrrrrr}
 \toprule
-\textbf{Métrica} & \multicolumn{4}{c}{\textbf{Semilla Oficial de Grupo 534}} & \multicolumn{2}{c}{\textbf{Semilla 392}} & \multicolumn{2}{c}{\textbf{Semilla 142}} \\
-\cmidrule(lr){2-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
-& \textbf{Mínimo} & \textbf{Máximo} & \textbf{Promedio} & \textbf{Total Semanal} & \textbf{Promedio} & \textbf{Total} & \textbf{Promedio} & \textbf{Total} \\
+\textbf{Métrica} & \multicolumn{4}{c}{\textbf{Semilla Oficial de Grupo 534}}\\
+\cmidrule(lr){2-5}
+& \textbf{Mínimo} & \textbf{Máximo} & \textbf{Promedio} & \textbf{Total Semanal}\\
 \midrule
-$P^{peak}$ generado [MW] & --- & --- & 283,23 & --- & 287,65 & --- & 280,33 & --- \\
-Demanda $d_t$ [MW] & 97 & 302 & 202,43 & 34.008 MWh & 205,17 & 34.469 MWh & 199,86 & 33.576 MWh \\
-Precio red $\lambda_t$ [CLP/MWh] & 128.306 & 202.420 & 168.788 & --- & 169.022 & --- & 169.031 & --- \\
-Reserva $Res_t$ [MW] & 10 & 30 & 20,24 & --- & 20,52 & --- & 19,99 & --- \\
+$P^{peak}$ generado [MW] & --- & --- & 283,23 & --- \\
+Demanda $d_t$ [MW] & 97 & 302 & 202,43 & 34.008 MWh \\
+Precio red $\lambda_t$ [CLP/MWh] & 128.306 & 202.420 & 168.788 & --- \\
+Reserva $Res_t$ [MW] & 10 & 30 & 20,24 & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-En la Figura \ref{fig:1a_perfiles} se ilustra la serie temporal de demanda y precios de red a lo largo de las 168 horas para la Semilla Oficial 534.
+En la Figura \ref{fig:1a_perfiles} se ilustra la serie temporal de demanda y precios de red a lo largo de las 168 horas de la semana.
 
 \begin{figure}[H]
 \centering
-\includegraphics[height=4.6cm,width=0.92\linewidth]{figuras/fig_1a_demanda_precios_sem_534.png}
-\caption{Perfiles semanales de demanda horaria $d_t$ y precio de importación de la red $\lambda_t$ (Semilla de Grupo 534).}
+\includegraphics[height=7.5cm,width=0.92\linewidth]{figuras/fig_1a_demanda_precios_sem_534.png}
+\caption{Perfiles semanales de demanda horaria $d_t$ y precio de importación de la red $\lambda_t$.}
 \label{fig:1a_perfiles}
 \end{figure}
 
-\subsection{Pregunta 1.b: Formulación Matemática del Modelo de Optimización}
+\subsection{Pregunta 1.b: Modelamiento del enunciado}
 \label{subsec:1b}
-
-Siguiendo el estándar formal de la cátedra de Investigación de Operaciones (ILN250), se detalla a continuación el modelo de Unit Commitment y Despacho Económico.
 
 \subsubsection*{1. Conjuntos e Índices}
 \begin{itemize}
@@ -208,15 +194,15 @@ Siguiendo el estándar formal de la cátedra de Investigación de Operaciones (I
 \subsubsection*{2. Parámetros}
 \begin{itemize}
     \item $P_g^{max}, P_g^{min}$: Potencia máxima y mínima técnica de la unidad $g$ [MW].
-    \item $c_g^{var}$: Costo variable unitario de generación de la unidad $g$ [CLP/MWh].
+    \item $c_g^{var}$: Costo variable de generación de la unidad $g$ [CLP/MWh].
     \item $c_g^{nl}$: Costo fijo horario de operación en vacío (\textit{no-load}) de la unidad $g$ [CLP/h].
-    \item $c_g^{start}$: Costo de partida o arranque de la unidad $g$ [CLP].
+    \item $c_g^{start}$: Costo de arranque de la unidad $g$ [CLP].
     \item $R_g$: Rampa máxima de subida y bajada de la unidad $g$ [MW/h].
     \item $u_g^0, p_g^0$: Estado de encendido inicial (1 o 0) y potencia inicial [MW] de la unidad $g$ en $t=0$.
     \item $\bar{G}_{red}$: Capacidad máxima de importación desde la red externa [MW] ($\bar{G}_{red} = 80$ MW).
-    \item $d_t$: Demanda eléctrica proyectada en la hora $t$ [MW].
-    \item $\lambda_t$: Precio horario de importación de energía eléctrica desde la red en la hora $t$ [CLP/MWh].
-    \item $Res_t$: Reserva operativa mínima rodante requerida en la hora $t$ [MW] ($Res_t = \lfloor 0.10 \cdot d_t \rceil$).
+    \item $d_t$: Demanda eléctrica para la hora $t$ [MW].
+    \item $\lambda_t$: Precio de importación de energía eléctrica desde la red en la hora $t$ [CLP/MWh].
+    \item $Res_t$: Reserva mínima requerida en la hora $t$ [MW] ($Res_t = \lfloor 0.10 \cdot d_t \rceil$).
     \item $SU_g, SD_g$: Límite de rampa al arranque y parada de la unidad $g$ [MW], definido como $\max(P_g^{min}, R_g)$.
 \end{itemize}
 
@@ -224,7 +210,7 @@ Siguiendo el estándar formal de la cátedra de Investigación de Operaciones (I
 \begin{itemize}
     \item $u_{g,t} \in \{0, 1\}$: Variable binaria de compromiso; 1 si la unidad $g$ está encendida en la hora $t$, 0 si está apagada.
     \item $v_{g,t} \ge 0$: Variable continua indicadora de arranque; toma el valor 1 si la unidad $g$ arranca en la hora $t$, 0 e.o.c.
-    \item $p_{g,t} \ge 0$: Potencia eléctrica generada por la unidad térmica $g$ en la hora $t$ [MW].
+    \item $p_{g,t} \ge 0$: Potencia eléctrica generada por la unidad $g$ en la hora $t$ [MW].
     \item $g_t^{red} \ge 0$: Potencia eléctrica importada desde la red externa en la hora $t$ [MW].
 \end{itemize}
 
@@ -256,18 +242,18 @@ Minimizar el costo total de operación del complejo industrial a lo largo de la 
         p_{g,t-1} - p_{g,t} &\le R_g \cdot u_{g,t} + SD_g \cdot (1 - u_{g,t}), \quad \forall g \in G, \, t \in T \label{eq:ramp_down}
     \end{align}
     (con $p_{g,0} = p_g^0$ y $u_{g,0} = u_g^0$). \\
-    \textit{Explicación:} Si la máquina está encendida en periodos consecutivos ($u_{g,t-1}=u_{g,t}=1$), la variación de carga está estrictamente acotada por $R_g$. Al arrancar ($u_{g,t-1}=0, u_{g,t}=1$), la potencia inicial queda acotada por $SU_g = \max(P_g^{min}, R_g)$; combinado con \eqref{eq:p_bounds}, esto permite a las turbinas de gas encender en su mínimo técnico ($P^{min}=40 > R_g=30$) sin causar infactibilidad, y a los grupos diésel encender hasta $R_g$ sin restricciones artificiales. Análogamente, al detenerse ($u_{g,t}=0$), se exige que en la hora previa la máquina haya bajado a lo más a $SD_g$.
+    \textit{Explicación:} Si la máquina está encendida en periodos consecutivos, la variación de potencia debe ser menor a $R_g$. Al arrancar, la potencia inicial queda acotada por $SU_g = \max(P_g^{min}, R_g)$; combinado con \eqref{eq:p_bounds}, esto permite a las turbinas de gas encender en su mínimo técnico ($P^{min}=40 > R_g=30$) ¿, y a los grupos diésel encender hasta $R_g$. Al detenerse ($u_{g,t}=0$), se exige que en la hora previa la máquina haya bajado a lo más a $SD_g$.
     
-    \item \textbf{Balance Instantáneo de Energía (Satisfacción de Demanda):}
+    \item \textbf{Balance de Energía (Satisfacción de Demanda):}
     \begin{equation}
         \sum_{g \in G} p_{g,t} + g_t^{red} = d_t, \quad \forall t \in T \label{eq:balance_base}
     \end{equation}
     
-    \item \textbf{Reserva Operativa Rodante Mínima:}
+    \item \textbf{Reserva Mínima:}
     \begin{equation}
         \sum_{g \in G} \left( P_g^{max} \cdot u_{g,t} - p_{g,t} \right) + \left( \bar{G}_{red} - g_t^{red} \right) \ge Res_t, \quad \forall t \in T \label{eq:reserva_base}
     \end{equation}
-    \textit{Explicación:} Exige que la capacidad disponible no utilizada de generadores encendidos más el margen libre de importación de la red externa cubran al menos el 10\% de la demanda horaria. Sustituyendo el balance \eqref{eq:balance_base}, equivale a garantizar que la potencia total en línea satisfaga $\sum P_g^{max} u_{g,t} + \bar{G}_{red} \ge d_t + Res_t$.
+    \textit{Explicación:} Exige que la capacidad disponible no utilizada de generadores encendidos más el margen libre de importación de la red externa sumen al menos el 10\% de la demanda horaria. Sustituyendo el balance \eqref{eq:balance_base}, equivale a garantizar que la potencia total en línea satisfaga $\sum P_g^{max} u_{g,t} + \bar{G}_{red} \ge d_t + Res_t$.
     
     \item \textbf{Capacidad de Importación de Red y Naturaleza de Variables:}
     \begin{equation}
@@ -279,10 +265,10 @@ Minimizar el costo total de operación del complejo industrial a lo largo de la 
 \label{subsec:1c}
 
 \subsubsection*{1. Naturaleza Matemática del Problema}
-El problema formulado es un \textbf{Programa Lineal Entero Mixto (MILP)}, cuya complejidad computacional es \textbf{NP-hard}. La presencia de variables binarias ($u_{g,t}$) induce un espacio de búsqueda no convexo con $2^{5 \times 168} = 2^{840} \approx 5.46 \times 10^{252}$ combinaciones discretas teóricas. La relajación lineal continua produce soluciones fraccionarias no operables (fracciones de generadores encendidos), requiriendo algoritmos de enumeración implícita guiados por planos de corte (\textit{Branch and Cut}) \cite{carrion2006computationally}.
+El problema formulado es un \textbf{Programa Lineal Entero Mixto (MILP)} puesto a que ingcluye variables binarias y continuas con relaciones estrictamente lineales.
 
 \subsubsection*{2. Idoneidad del Solver Seleccionado}
-Se utilizó el solver de código abierto de última generación \textbf{HiGHS} (\texttt{appsi\_highs}), ampliamente validado en investigación operativa \cite{huangfu2018parallelizing}. HiGHS resulta óptimo gracias a:
+Se utilizó el solver de código abierto \textbf{HiGHS} (\texttt{appsi\_highs}), ampliamente usado en investigación operativa. HiGHS resulta óptimo gracias a:
 \begin{itemize}
     \item \textbf{Pre-procesamiento Robusto (\textit{Presolve}):} Reduce drásticamente el tamaño del modelo mediante fijación de variables y apriete de cotas.
     \item \textbf{Planos de Corte Especializados:} Incorpora cortes de cliques, residuo mixto entero (MIR) y Gomory, cerrando la brecha de integrabilidad en el nodo raíz.
@@ -307,9 +293,9 @@ Tiempo de cómputo del solver & 0,81 s \\
 Variables de decisión / Restricciones & 1.680 (840 binarias, 840 cont.) / 2.184 \\
 \midrule
 \textbf{Costo Total de Operación [CLP]} & \textbf{\$1.776.019.094,00} \\
--- Costo Variable (Combustible + O\&M) & \$1.664.741.000,00 (93,73\%) \\
+-- Costo Variable & \$1.664.741.000,00 (93,73\%) \\
 -- Costo Fijo de Operación (\textit{No-Load}) & \$100.060.000,00 (5,63\%) \\
--- Costo de Arranque (\textit{Startup}) & \$7.800.000,00 (0,44\%) \\
+-- Costo de Arranque  & \$7.800.000,00 (0,44\%) \\
 -- Costo de Importación de Red Externa & \$3.418.094,00 (0,19\%) \\
 \bottomrule
 \end{tabular}
@@ -322,7 +308,7 @@ En la Tabla \ref{tab:desglose_unidades_base} y la Figura \ref{fig:1d_despacho_ba
 
 \begin{table}[H]
 \centering
-\caption{Despacho y compromiso de unidades en la solución óptima del Caso Base (Semilla 534).}
+\caption{Despacho y compromiso de unidades en la solución óptima del Caso Base.}
 \label{tab:desglose_unidades_base}
 \setlength{\tabcolsep}{4pt}
 \small
@@ -345,8 +331,8 @@ En la Tabla \ref{tab:desglose_unidades_base} y la Figura \ref{fig:1d_despacho_ba
 
 \begin{figure}[H]
 \centering
-\includegraphics[height=5.0cm,width=0.92\linewidth]{figuras/fig_1d_despacho_base_sem_534.png}
-\caption{Despacho económico apilado y reserva operativa horaria en el Caso Base (Semilla 534).}
+\includegraphics[height=7.5cm,width=0.92\linewidth]{figuras/fig_1d_despacho_base_sem_534.png}
+\caption{Despacho económico apilado y reserva operativa horaria en el Caso Base.}
 \label{fig:1d_despacho_base}
 \end{figure}
 
@@ -354,58 +340,58 @@ El análisis técnico-económico arroja conclusiones fundamentales:
 \begin{enumerate}
     \item \textbf{Orden de Mérito Económico:} Se verifica un estricto despacho por mérito de costos variables y de no-load:
     \begin{itemize}
-        \item \textit{Unidades de Base:} \texttt{Gas\_Base\_1} opera las 168 horas a plena capacidad (FP 95,9\%), sin arranques. \texttt{Gas\_Base\_2} actúa como segunda base modulante (FP 72,7\%), ciclando potencia durante valles nocturnos.
+        \item \textit{Unidades de Base:} \texttt{Gas\_Base\_1} opera las 168 horas a plena capacidad (FP 95,9\%), sin arranques. \texttt{Gas\_Base\_2} actúa como segunda base (FP 72,7\%).
         \item \textit{Unidades Intermedias y de Punta:} \texttt{Diesel\_Med\_1} opera en horas laborales de alta carga (5 arranques semanales sincronizados con el inicio diurno). \texttt{Diesel\_Med\_2} y \texttt{Peaker} se reservan exclusivamente para los picos extremos de demanda ($FP \le 0,5\%$).
     \end{itemize}
-    \item \textbf{Comportamiento de Arranques:} El modelo evita encender unidades de gas debido a sus cuantiosos costos de partida (\$2.000.000 y \$1.800.000 CLP), mientras que aprovecha la flexibilidad de las máquinas diésel cuyos costos de arranque (\$600.000 y \$500.000 CLP) son absorbidos rápidamente durante las horas diurnas.
-    \item \textbf{Uso Racionado de la Red Externa:} La importación de red es ínfima (18,0 MWh en 6 horas). Dado que su costo promedio (\$168.788 CLP/MWh) supera al generador más costoso del complejo (\texttt{Peaker} a \$120.000 CLP/MWh), la red \textbf{no se usa para arbitraje}, sino como recurso de confiabilidad ante restricciones de rampa o límites de reserva en picos de demanda.
+    \item \textbf{Comportamiento de Arranques:} El modelo evita apagar unidades de gas debido a sus cuantiosos costos de partida (\$2.000.000 y \$1.800.000 CLP), mientras que aprovecha la flexibilidad de las máquinas diésel cuyos costos de arranque (\$600.000 y \$500.000 CLP) son menores.
+    \item \textbf{Uso Racionado de la Red Externa:} La importación de red es baja (18,0 MWh en 6 horas). Dado que su costo promedio (\$168.788 CLP/MWh) supera al generador más costoso del complejo (\texttt{Peaker} a \$120.000 CLP/MWh), la red solo se usa ante restricciones de rampa o límites de reserva en picos de demanda.
     \item \textbf{Horas Críticas de Reserva Operativa:} La holgura de reserva ($\text{Reserva Disponible} - Res_t$) se vuelve más exigente en las horas de demanda punta vespertina de días hábiles ($t = 19, 43, 67, 91, 115$), correspondientes a las 18:00--20:00 horas, donde $Res_t$ alcanza 30 MW.
 \end{enumerate}
 
 \section{Variaciones}
 \label{sec:variaciones}
 
-\subsection{Pregunta 2.a: Incorporación de un Sistema de Almacenamiento (Batería BESS)}
+\subsection{Pregunta 2.a: Incorporación de un Sistema de Almacenamiento}
 \label{subsec:2a}
 
-Se integró un sistema de almacenamiento BESS con capacidad de energía $\bar{S} = 200$ MWh, potencia máxima de carga/descarga $\bar{B}^{ch} = \bar{B}^{dis} = 60$ MW, eficiencias $\eta^{ch} = \eta^{dis} = 0.95$ y estado de carga inicial y final mínimo $S_0 = 100$ MWh. Se introducen las variables $p_{ch,t}, p_{dis,t} \in [0, 60]$ y $S_t \in [0, 200]$.
+Se integró un sistema de almacenamiento con capacidad de energía $\bar{S} = 200$ MWh, potencia máxima de carga/descarga $\bar{B}^{ch} = \bar{B}^{dis} = 60$ MW, eficiencias $\eta^{ch} = \eta^{dis} = 0.95$ y estado de carga inicial y final mínimo $S_0 = 100$ MWh. Se introducen las variables $p_{ch,t}, p_{dis,t} \in [0, 60]$ y $S_t \in [0, 200]$.
 
 \subsubsection*{Modificaciones Matemáticas al Modelo}
 \begin{enumerate}[label=\textbf{R\arabic*.}]
     \setcounter{enumi}{6}
-    \item \textbf{Balance Dinámico del Estado de Carga (SOC) y Condición Final:}
+    \item \textbf{Balance de Carga y Condición Final:}
     \begin{align}
         S_t &= S_{t-1} + \eta^{ch} \cdot p_{ch,t} - \frac{p_{dis,t}}{\eta^{dis}}, \quad \forall t \in T \quad (\text{con } S_0 = 100 \text{ MWh}) \label{eq:soc_bal} \\
         S_{168} &\ge S_0 = 100 \text{ MWh} \label{eq:soc_final}
     \end{align}
-    \item \textbf{Balance de Energía Modificado con BESS:}
+    \item \textbf{Balance de Energía Modificado para Batería:}
     \begin{equation}
         \sum_{g \in G} p_{g,t} + g_t^{red} + p_{dis,t} = d_t + p_{ch,t}, \quad \forall t \in T \label{eq:bal_bateria}
     \end{equation}
 \end{enumerate}
 
 \subsubsection*{Resultados y Análisis Comparativo con el Caso Base}
-En la Tabla \ref{tab:comparacion_bateria} y la Figura \ref{fig:2a_bateria} se sintetiza el impacto del BESS para la Semilla 534.
+En la Tabla \ref{tab:comparacion_bateria} y las Figuras \ref{fig:2a_despacho_bateria} y \ref{fig:2a_bateria} se sintetiza el impacto de la batería.
 
 \begin{table}[H]
 \centering
-\caption{Comparación técnica y económica entre Caso Base y Variación BESS (Semilla 534).}
+\caption{Comparación técnica y económica entre Caso Base y Variación Batería.}
 \label{tab:comparacion_bateria}
 \setlength{\tabcolsep}{6pt}
 \small
 \begin{tabular}{lrrr}
 \toprule
-\textbf{Métrica de Evaluación} & \textbf{Caso Base} & \textbf{Con Batería BESS} & \textbf{Variación Relativa} \\
+\textbf{Métrica de Evaluación} & \textbf{Caso Base} & \textbf{Con Batería} & \textbf{Variación Relativa} \\
 \midrule
 \textbf{Costo Total Semanal [CLP]} & \textbf{\$1.776.019.094} & \textbf{\$1.732.045.839} & \textbf{-2,48\% (-\$43.973.255)} \\
--- Costo Combustible + O\&M & \$1.664.741.000 & \$1.624.775.839 & -2,40\% \\
+-- Costo Combustible & \$1.664.741.000 & \$1.624.775.839 & -2,40\% \\
 -- Costo No-Load & \$100.060.000 & \$99.470.000 & -0,59\% \\
 -- Costo Arranque & \$7.800.000 & \$7.800.000 & 0,00\% \\
 -- Costo Importación Red & \$3.418.094 & \textbf{\$0} & \textbf{-100,00\%} \\
 \midrule
 Importación Red Externa [MWh] & 18,0 MWh & \textbf{0,0 MWh} & \textbf{-100,00\%} \\
-Energía Cargada / Descargada BESS & --- & 1.225,5 / 1.106,0 MWh & Pérdidas = 119,5 MWh \\
-SOC Final ($S_{168}$) [MWh] & --- & 100,0 MWh & Neutro ($\ge 100$) \\
+Energía Cargada / Descargada & --- & 1.225,5 / 1.106,0 MWh & Pérdidas = 119,5 MWh \\
+Carga Final ($S_{168}$) [MWh] & --- & 100,0 MWh & Neutro ($\ge 100$) \\
 \midrule
 \textbf{Arranques Totales de Generadores} & \textbf{10} & \textbf{6} & \textbf{-40,00\% (-4 arranques)} \\
 -- \texttt{Diesel\_Med\_2} (Arranques) & 2 & \textbf{0} & \textbf{-100\% (eliminado)} \\
@@ -417,24 +403,31 @@ SOC Final ($S_{168}$) [MWh] & --- & 100,0 MWh & Neutro ($\ge 100$) \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[height=4.8cm,width=0.92\linewidth]{figuras/fig_2a_operacion_bateria_sem_534.png}
-\caption{Ciclos de carga, descarga y evolución del estado de carga ($S_t$) del BESS (Semilla 534).}
+\includegraphics[height=7.0cm,width=0.92\linewidth]{figuras/fig_2a_despacho_bateria_sem_534.png}
+\caption{Despacho económico apilado y reserva operativa horaria incorporando el sistema de almacenamiento de energía (Variación 2.a).}
+\label{fig:2a_despacho_bateria}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=7.0cm,width=0.92\linewidth]{figuras/fig_2a_operacion_bateria_sem_534.png}
+\caption{Ciclos de carga, descarga y evolución del estado de carga ($S_t$) de la batería (Semilla 534).}
 \label{fig:2a_bateria}
 \end{figure}
 
 El análisis operativo revela:
 \begin{enumerate}
-    \item \textbf{Aplanamiento de Curva de Carga (\textit{Peak Shaving} y \textit{Valley Filling}):} La batería almacena energía en horas de valle nocturno utilizando capacidad ociosa de las máquinas a gas (\$45.000 CLP/MWh) y la descarga durante los picos de las 18:00--21:00 horas inyectando hasta 60 MW.
-    \item \textbf{Eliminación Total de Unidades de Punta y Red Externa:} El BESS elimina en un 100\% la importación de red y suprime todos los arranques de \texttt{Diesel\_Med\_2} y \texttt{Peaker}, evitando costosos combustibles y partidas térmicas.
+    \item \textbf{Aplanamiento de Curva de Carga:} La batería almacena energía en horas de la noche-madrugada utilizando capacidad ociosa de las máquinas a gas (\$45.000 CLP/MWh) y la descarga durante los picos de las 18:00--21:00 horas inyectando hasta 60 MW.
+    \item \textbf{Eliminación Total de Unidades de Punta y Red Externa:} La batería elimina en un 100\% la importación de red y suprime todos los arranques de \texttt{Diesel\_Med\_2} y \texttt{Peaker}, evitando costosos combustibles y partidas térmicas.
     \item \textbf{Rentabilidad pese a las Pérdidas de Ciclo:} Aunque la eficiencia combinada ($\eta^{ch}\eta^{dis} = 90.25\%$) disipa 119,5 MWh semanales, el diferencial económico entre cargar a \$45.000 y evitar despachos a \$120.000 CLP/MWh genera un ahorro neto de más de \$43,9 millones CLP semanales.
 \end{enumerate}
 
 \subsection{Pregunta 2.b: Respuesta de la Demanda (Carga Interrumpible)}
 \label{subsec:2b}
 
-Se modeló la carga interrumpible $r_t \ge 0$ sujeta a la cota horaria $\bar{\ell}^h = 0.20$ ($r_t \le 0.20 \cdot d_t$) y cuota semanal $\bar{\ell}^s = 0.05$ ($\sum r_t \le 0.05 \sum d_t$), con costo unitario de corte $c^{shed}$ [CLP/MWh].
+Se implementó la variable de recorte $r_t \ge 0$ sujeta a la cota horaria $\bar{\ell}^h = 0.20$ ($r_t \le 0.20 \cdot d_t$) y cuota semanal $\bar{\ell}^s = 0.05$ ($\sum r_t \le 0.05 \sum d_t$), con costo de corte $c^{shed}$ [CLP/MWh].
 
-\subsubsection*{Modificaciones Matemáticas al Modelo}
+\subsubsection*{Restricciónes y cambios al modelo}
 \begin{itemize}
     \item Balance de energía modificado: $\sum_{g \in G} p_{g,t} + g_t^{red} = d_t - r_t, \quad \forall t \in T$.
     \item Cotas de corte: $r_t \le 0.20 \cdot d_t \quad (\forall t \in T)$ y $\sum_{t=1}^{168} r_t \le 0.05 \cdot \sum_{t=1}^{168} d_t$.
@@ -446,7 +439,7 @@ En la Tabla \ref{tab:cshed_sweep} y la Figura \ref{fig:variaciones_sensibilidad}
 
 \begin{table}[H]
 \centering
-\caption{Sensibilidad del recorte de demanda y costo total frente a $c^{shed}$ (Semilla 534, Cupo = 1.700,4 MWh).}
+\caption{Sensibilidad del recorte de demanda y costo total frente a $c^{shed}$ (Cupo = 1.700,4 MWh).}
 \label{tab:cshed_sweep}
 \setlength{\tabcolsep}{4pt}
 \small
@@ -485,7 +478,7 @@ El corte de carga actúa como un generador virtual. La condición de optimizaci�
 \subsection{Pregunta 2.c: Costo Fijo por Sobrepasar un Umbral Diario de Emisiones}
 \label{subsec:2c}
 
-Cada unidad $g$ emite $e_g$ toneladas de $\text{CO}_2$ por MWh generado ($e_g = [0.35, 0.38, 0.65, 0.68, 0.75]$ t$\text{CO}_2$/MWh). Se impone un umbral diario $\bar{E}^{day} = 1.500 \text{ tCO}_2$ durante cada día $d \in \{1, \ldots, 7\}$ (con $T_d = \{24(d-1)+1, \ldots, 24d\}$), incurriendo en una penalización fija $F$ [CLP/día] en caso de superarlo.
+Cada unidad $g$ emite $e_g$ toneladas de $\text{CO}_2$ por MWh generado ($e_g = [0.35, 0.38, 0.65, 0.68, 0.75]$ t$\text{CO}_2$/MWh). Se impone un umbral diario $\bar{E}^{day} = 1.500 \text{ tCO}_2$ durante cada día $d \in \{1, \ldots, 7\}$ , incurriendo en una penalización fija $F$ [CLP/día] en caso de superarlo.
 
 \subsubsection*{Formulación Matemática Big-M}
 Se introduce la variable binaria $y_d^{emiss} \in \{0, 1\}$, que indica si el día $d$ supera el umbral:
@@ -495,7 +488,7 @@ Se introduce la variable binaria $y_d^{emiss} \in \{0, 1\}$, que indica si el d�
     \begin{equation}
         \sum_{t \in T_d} \sum_{g \in G} e_g \cdot p_{g,t} - \bar{E}^{day} \le M \cdot y_d^{emiss}, \quad \forall d \in \{1, \ldots, 7\} \label{eq:big_m}
     \end{equation}
-    \textit{Determinación del parámetro Big-M:} La emisión física máxima diaria ocurre con las 5 máquinas al 100\% durante 24 horas: $E_{max}^{day} = 24 \times (0.35 \times 120 + 0.38 \times 100 + 0.65 \times 60 + 0.68 \times 50 + 0.75 \times 40) = 4.392 \text{ tCO}_2$. Por ende, la cota superior del exceso es $4.392 - 1.500 = 2.892 \text{ tCO}_2$. Se establece $M = 3.000 \text{ tCO}_2$, garantizando rigor y convergencia veloz del Branch and Bound.
+    \textit{Determinación del parámetro Big-M:} La emisión física máxima diaria ocurre con las 5 máquinas al 100\% durante 24 horas: $E_{max}^{day} = 24 \times (0.35 \times 120 + 0.38 \times 100 + 0.65 \times 60 + 0.68 \times 50 + 0.75 \times 40) = 4.392 \text{ tCO}_2$. Por ende, la cota superior del exceso es $4.392 - 1.500 = 2.892 \text{ tCO}_2$. Se establece $M = 3.000 \text{ tCO}_2$.
     \item \textbf{Función Objetivo con Penalización Ambiental:}
     \begin{equation}
         \min Z_{emiss} = Z_{base} + \sum_{d=1}^7 F \cdot y_d^{emiss} \label{eq:fo_emiss}
@@ -503,11 +496,11 @@ Se introduce la variable binaria $y_d^{emiss} \in \{0, 1\}$, que indica si el d�
 \end{enumerate}
 
 \subsubsection*{Evaluación Paramétrica y Tipping Points de Cumplimiento}
-En la Tabla \ref{tab:F_sweep} y la Figura \ref{fig:variaciones_sensibilidad}(b) se reporta el barrido paramétrico de $F \in [0, 200.000.000]$ CLP/día para la Semilla 534.
+En la Tabla \ref{tab:F_sweep} y la Figura \ref{fig:variaciones_sensibilidad}(b) se reporta el barrido paramétrico de $F \in [0, 200.000.000]$ CLP/día.
 
 \begin{table}[H]
 \centering
-\caption{Sensibilidad de días sobre el umbral de emisiones y costos frente a la penalización $F$ (Semilla 534).}
+\caption{Sensibilidad de días sobre el umbral de emisiones y costos frente a la penalización $F$.}
 \label{tab:F_sweep}
 \setlength{\tabcolsep}{4pt}
 \small
@@ -551,13 +544,12 @@ $F$ \textbf{[CLP/día]} & \textbf{Días Sobre Umbral} & \textbf{Costo Operativo 
 \subsubsection*{Discusión de Implicancias Técnicas y Regulatorias}
 El comportamiento del sistema revela conclusiones de alto valor regulatorio:
 \begin{enumerate}
-    \item \textbf{Cumplimiento Natural en Fines de Semana:} A diferencia de otras instancias con mayor demanda peak, en la Semilla 534 los días sábado y domingo (días 6 y 7) emiten en el caso base $1.483,8$ y $1.487,2\text{ tCO}_2$, situándose **espontáneamente por debajo del umbral de 1.500 $\text{tCO}_2$** debido al factor $\gamma_{dia} = 0.8$. Por ello, para cualquier $F \le \$75.000.000$ CLP/día, el número de días infractores es exactamente 5 (los 5 días laborales).
+    \item \textbf{Cumplimiento Natural en Fines de Semana:} A diferencia de otras instancias con mayor demanda peak, los días sábado y domingo (días 6 y 7) emiten en el caso base $1.483,8$ y $1.487,2\text{ tCO}_2$, situándose por debajo del umbral de 1.500 $\text{tCO}_2$** debido al factor $\gamma_{dia} = 0.8$. Por ello, para cualquier $F \le \$75.000.000$ CLP/día, el número de días infractores es exactamente 5.
     \item \textbf{Tipping Points de Cumplimiento en Días Laborales:} En días hábiles, la demanda diaria supera los $5.100$ MWh, generando sobre $2.000 \text{ tCO}_2$. Bajar a $1.500 \text{ tCO}_2$ exige importar masivamente de la red a su tope de 80 MW/h todo el día ($1.920$ MWh/día). Dado que cada MWh importado cuesta $\approx \$169.000$ CLP mientras que el gas propio cuesta $\approx \$45.000$ CLP, el sobrecosto diario supera los \textbf{\$100 millones CLP por día hábil}. En consecuencia:
     \begin{itemize}
         \item A $F = \$100.000.000$ CLP/día, el sistema comienza a abatir y reduce de 5 a 2 días infractores.
         \item A $F \ge \$120.000.000$ CLP/día, se alcanza el cumplimiento pleno (0 días sobre el umbral), con un costo operativo que pasa de \$1.776 millones a \$2.276 millones CLP semanales.
     \end{itemize}
-    \item \textbf{Ineficiencia de Sanciones Discontinuas vs Impuesto Pigouviano:} Un umbral fijo diario introduce una discontinuidad no convexa. Si el complejo supera el umbral por 1 tonelada, ya paga la multa completa $F$ y pierde todo incentivo marginal a seguir abatiendo durante el resto del día. Un impuesto lineal al carbono (CLP/$\text{tCO}_2$) eliminaría estas ineficiencias, promoviendo abatimiento continuo al menor costo social.
 \end{enumerate}
 
 \section{Conclusiones}
@@ -565,19 +557,13 @@ El comportamiento del sistema revela conclusiones de alto valor regulatorio:
 
 El desarrollo computacional y analítico de la presente Tarea Computacional 1 ha permitido obtener conclusiones determinantes para la toma de decisiones en micro-redes y despacho eléctrico:
 \begin{enumerate}
-    \item \textbf{Efectividad del Modelamiento MILP:} El modelo de Unit Commitment formulado capturó con fidelidad matemática las restricciones físicas complejas de rampas dinámicas, costos de partida y márgenes de reserva rodante. La implementación en Pyomo resuelta mediante el solver HiGHS garantizó la optimalidad global estricta en menos de un segundo para la Semilla 534.
+    \item \textbf{Efectividad del Modelamiento MILP:} El modelo de Unit Commitment formulado capturó con fidelidad matemática las restricciones físicas complejas de rampas dinámicas, costos de partida y márgenes de reserva rodante. La implementación en Pyomo resuelta mediante el solver HiGHS garantizó la optimalidad global estricta en menos de un segundo.
     \item \textbf{Despacho por Orden de Mérito:} La jerarquía de costos variables y costos fijos de no-load gobernó la operación. Las máquinas a gas son el pilar de base con factores de carga superiores al 72\%, mientras que las máquinas diésel proporcionan la agilidad de rampa y seguimiento de carga diurna.
-    \item \textbf{Valor del Almacenamiento (BESS):} La batería demostró ser una inversión con alto impacto operacional y financiero, logrando ahorros inmediatos de \$43.973.255 CLP semanales (2,48\%) y blindando al complejo industrial frente a la volatilidad de los precios de la red externa mediante la eliminación total de arranques peakers y de importaciones de red.
+    \item \textbf{Valor del Almacenamiento :} La batería demostró ser una inversión con alto impacto operacional y financiero, logrando ahorros inmediatos de \$43.973.255 CLP semanales (2,48\%) y blindando al complejo industrial frente a la volatilidad de los precios de la red externa mediante la eliminación total de arranques peakers y de importaciones de red.
     \item \textbf{Consistencia Microeconómica de la Demanda Interrumpible:} Se comprobó rigurosamente que el recorte voluntario de demanda cesa exactamente en el costo marginal máximo de importación (\$200.000 CLP/MWh), validando los principios económicos de formación de precios en sistemas eléctricos.
     \item \textbf{Diseño de Mecanismos Ambientales:} Se evidenció que las sanciones fijas diarias por umbral de emisiones conllevan distorsiones severas e incrementos desproporcionados de costos, recomendándose a los tomadores de decisión la adopción de tributos lineales continuos a las emisiones de $\text{CO}_2$.
 \end{enumerate}
 
-% =========================================================================
-% REFERENCIAS BIBLIOGRÁFICAS (No cuenta dentro de las 10 páginas)
-% =========================================================================
-\newpage
-\bibliographystyle{IEEEtran}
-\bibliography{referencias}
 
 % =========================================================================
 % ANEXOS TÉCNICOS (Opcional - No cuenta dentro de las 10 páginas)
@@ -591,7 +577,7 @@ En esta sección se presentan extractos tabulares de verificación de la soluci�
 
 \begin{table}[H]
 \centering
-\caption{Despacho horario detallado de las primeras 24 horas (Día 1, Semilla de Grupo 534).}
+\caption{Despacho horario detallado de las primeras 24 horas (Día 1).}
 \label{tab:anexo_dia1}
 \setlength{\tabcolsep}{3.5pt}
 \footnotesize
