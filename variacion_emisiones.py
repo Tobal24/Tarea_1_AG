@@ -1,8 +1,4 @@
-"""
-variacion_emisiones.py
-Implementación de la Variación 2.c: Costo Fijo por Sobrepasar Umbral Diario de Emisiones (Formulación Big-M).
-Tarea Computacional 1 - ILN250 (2s26).
-"""
+
 
 import pyomo.environ as pyo
 import pandas as pd
@@ -10,9 +6,6 @@ from generar_parametros import obtener_parametros_generadores, obtener_parametro
 
 
 def construir_modelo_emisiones(datos_instancia, F, M_big=3000.0):
-    """
-    Construye y retorna el modelo ConcreteModel de Pyomo con penalización Big-M por superar el umbral diario.
-    """
     gen_params = obtener_parametros_generadores()
     sys_params = obtener_parametros_sistema()
     
@@ -37,10 +30,8 @@ def construir_modelo_emisiones(datos_instancia, F, M_big=3000.0):
     m.p = pyo.Var(m.G, m.T, domain=pyo.NonNegativeReals)
     m.g_red = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, G_bar_red))
     
-    # Variable binaria indicadora de sobrepasar el umbral en el día d
     m.y_emiss = pyo.Var(m.DIAS, domain=pyo.Binary, doc="1 si el día d supera el umbral E_bar_day, 0 e.o.c.")
     
-    # Restricciones térmicas
     def startup_rule(model, g, t):
         u_prev = gen_params[g]['u_0'] if t == 1 else model.u[g, t - 1]
         return model.v[g, t] >= model.u[g, t] - u_prev
@@ -77,14 +68,12 @@ def construir_modelo_emisiones(datos_instancia, F, M_big=3000.0):
         return unused_gen + unused_grid >= res_t[t]
     m.con_reserve = pyo.Constraint(m.T, rule=reserve_rule)
     
-    # Restricción Big-M de emisiones diarias
     def big_m_emissions_rule(model, d):
         horas_dia = range(24 * (d - 1) + 1, 24 * d + 1)
         emisiones_dia = sum(gen_params[g]['e_g'] * model.p[g, t] for g in model.G for t in horas_dia)
         return emisiones_dia - E_bar_day <= M_big * model.y_emiss[d]
     m.con_big_m_emiss = pyo.Constraint(m.DIAS, rule=big_m_emissions_rule, doc="Restricción Big-M umbral emisiones")
     
-    # Función Objetivo: Costos base + suma(F * y_emiss_d)
     def objective_rule(model):
         costo_variables = sum(gen_params[g]['c_var'] * model.p[g, t] for g in model.G for t in model.T)
         costo_no_load = sum(gen_params[g]['c_nl'] * model.u[g, t] for g in model.G for t in model.T)
@@ -98,10 +87,7 @@ def construir_modelo_emisiones(datos_instancia, F, M_big=3000.0):
 
 
 def barrido_F(datos_instancia, lista_F=None, solver_name='appsi_highs'):
-    """
-    Ejecuta un barrido sobre diferentes valores del costo fijo de penalización F.
-    Devuelve DataFrame con el número de días sobre el umbral, costos operativos y emisiones.
-    """
+
     if lista_F is None:
         lista_F = [
             0, 500000, 1000000, 2000000, 2500000, 3000000, 5000000, 10000000,
@@ -116,7 +102,6 @@ def barrido_F(datos_instancia, lista_F=None, solver_name='appsi_highs'):
         m = construir_modelo_emisiones(datos_instancia, f_val)
         solver.solve(m)
         
-        # Con F=0, y_emiss puede ser 0 o 1 indistintamente; evaluamos el exceso real
         dias_sobre_umbral = 0
         emisiones_por_dia = []
         for d in range(1, 8):
@@ -127,7 +112,6 @@ def barrido_F(datos_instancia, lista_F=None, solver_name='appsi_highs'):
                 dias_sobre_umbral += 1
                 
         costo_total = pyo.value(m.obj)
-        # Costo de penalización efectivo
         costo_penalidad = f_val * dias_sobre_umbral
         costo_operativo = sum(
             sum(gen_params[g]['c_var'] * pyo.value(m.p[g, t]) + gen_params[g]['c_nl'] * pyo.value(m.u[g, t]) + gen_params[g]['c_start'] * pyo.value(m.v[g, t]) for g in m.G)

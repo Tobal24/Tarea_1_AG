@@ -1,8 +1,3 @@
-"""
-variacion_demanda.py
-Implementación de la Variación 2.b: Respuesta de la Demanda (Carga Interrumpible).
-Tarea Computacional 1 - ILN250 (2s26).
-"""
 
 import pyomo.environ as pyo
 import pandas as pd
@@ -10,9 +5,6 @@ from generar_parametros import obtener_parametros_generadores, obtener_parametro
 
 
 def construir_modelo_demanda(datos_instancia, c_shed):
-    """
-    Construye y retorna el modelo ConcreteModel de Pyomo con respuesta de demanda para un costo c_shed dado.
-    """
     gen_params = obtener_parametros_generadores()
     sys_params = obtener_parametros_sistema()
     
@@ -38,10 +30,8 @@ def construir_modelo_demanda(datos_instancia, c_shed):
     m.p = pyo.Var(m.G, m.T, domain=pyo.NonNegativeReals)
     m.g_red = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, G_bar_red))
     
-    # Variable de recorte de demanda [MW]
     m.r = pyo.Var(m.T, domain=pyo.NonNegativeReals, doc="Carga interrumpida en hora t [MW]")
     
-    # Restricciones térmicas
     def startup_rule(model, g, t):
         u_prev = gen_params[g]['u_0'] if t == 1 else model.u[g, t - 1]
         return model.v[g, t] >= model.u[g, t] - u_prev
@@ -78,19 +68,16 @@ def construir_modelo_demanda(datos_instancia, c_shed):
         doc="Máximo 5% de corte semanal"
     )
     
-    # Balance de energía con demanda neta
     def energy_balance_rule(model, t):
         return sum(model.p[g, t] for g in model.G) + model.g_red[t] == d_t[t] - model.r[t]
     m.con_energy_balance = pyo.Constraint(m.T, rule=energy_balance_rule)
     
-    # Reserva operativa
     def reserve_rule(model, t):
         unused_gen = sum(gen_params[g]['P_max'] * model.u[g, t] - model.p[g, t] for g in model.G)
         unused_grid = G_bar_red - model.g_red[t]
         return unused_gen + unused_grid >= res_t[t]
     m.con_reserve = pyo.Constraint(m.T, rule=reserve_rule)
     
-    # Función Objetivo: Costos de generación + red + costo de recorte de demanda
     def objective_rule(model):
         costo_variables = sum(gen_params[g]['c_var'] * model.p[g, t] for g in model.G for t in model.T)
         costo_no_load = sum(gen_params[g]['c_nl'] * model.u[g, t] for g in model.G for t in model.T)
@@ -104,10 +91,6 @@ def construir_modelo_demanda(datos_instancia, c_shed):
 
 
 def barrido_c_shed(datos_instancia, lista_c_shed=None, solver_name='appsi_highs'):
-    """
-    Ejecuta un barrido exhaustivo sobre distintos valores de c_shed.
-    Devuelve DataFrame con el comportamiento del sistema y el valor umbral.
-    """
     if lista_c_shed is None:
         lista_c_shed = [
             0, 20000, 40000, 45000, 50000, 60000, 70000, 80000, 85000, 90000,
@@ -141,7 +124,6 @@ def barrido_c_shed(datos_instancia, lista_c_shed=None, solver_name='appsi_highs'
         
     df_res = pd.DataFrame(resultados)
     
-    # Determinar el umbral exacto donde el recorte se vuelve 0
     df_zero = df_res[df_res['recorte_total_MWh'] < 1e-2]
     c_umbral = df_zero['c_shed'].min() if not df_zero.empty else None
     

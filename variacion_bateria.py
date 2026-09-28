@@ -1,8 +1,3 @@
-"""
-variacion_bateria.py
-Implementación de la Variación 2.a: Incorporación de un Sistema de Almacenamiento de Energía (Batería BESS).
-Tarea Computacional 1 - ILN250 (2s26).
-"""
 
 import pyomo.environ as pyo
 import pandas as pd
@@ -10,9 +5,7 @@ from generar_parametros import obtener_parametros_generadores, obtener_parametro
 
 
 def construir_modelo_bateria(datos_instancia):
-    """
-    Construye y retorna el modelo ConcreteModel de Pyomo con la batería BESS incorporada.
-    """
+
     gen_params = obtener_parametros_generadores()
     sys_params = obtener_parametros_sistema()
     
@@ -24,7 +17,6 @@ def construir_modelo_bateria(datos_instancia):
     res_t = datos_instancia['res_t']
     G_bar_red = sys_params['G_bar_red']
     
-    # Parámetros Batería
     S_bar = sys_params['S_bar']         # 200 MWh
     B_bar_ch = sys_params['B_bar_ch']   # 60 MW
     B_bar_dis = sys_params['B_bar_dis'] # 60 MW
@@ -37,18 +29,15 @@ def construir_modelo_bateria(datos_instancia):
     m.T = pyo.Set(initialize=T)
     m.G = pyo.Set(initialize=G)
     
-    # Variables de generación térmica y red
     m.u = pyo.Var(m.G, m.T, domain=pyo.Binary)
     m.v = pyo.Var(m.G, m.T, domain=pyo.NonNegativeReals, bounds=(0, 1))
     m.p = pyo.Var(m.G, m.T, domain=pyo.NonNegativeReals)
     m.g_red = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, G_bar_red))
     
-    # Variables de batería
     m.p_ch = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, B_bar_ch), doc="Potencia de carga MW")
     m.p_dis = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, B_bar_dis), doc="Potencia de descarga MW")
     m.soc = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, S_bar), doc="Estado de carga MWh")
     
-    # Restricciones térmicas
     def startup_rule(model, g, t):
         u_prev = gen_params[g]['u_0'] if t == 1 else model.u[g, t - 1]
         return model.v[g, t] >= model.u[g, t] - u_prev
@@ -75,28 +64,23 @@ def construir_modelo_bateria(datos_instancia):
         return p_prev - model.p[g, t] <= gen_params[g]['R_g'] * model.u[g, t] + SD * (1 - model.u[g, t])
     m.con_ramp_down = pyo.Constraint(m.G, m.T, rule=ramp_down_rule)
     
-    # Balance de estado de carga (SOC)
     def soc_balance_rule(model, t):
         soc_prev = S_0 if t == 1 else model.soc[t - 1]
         return model.soc[t] == soc_prev + eta_ch * model.p_ch[t] - model.p_dis[t] / eta_dis
     m.con_soc_balance = pyo.Constraint(m.T, rule=soc_balance_rule, doc="Dinámica de estado de carga de la batería")
     
-    # Exigencia de SOC final al menos igual al inicial
     m.con_soc_final = pyo.Constraint(expr=m.soc[sys_params['T']] >= S_0, doc="SOC final >= SOC inicial")
     
-    # Balance de energía modificado
     def energy_balance_bat_rule(model, t):
         return sum(model.p[g, t] for g in model.G) + model.g_red[t] + model.p_dis[t] == d_t[t] + model.p_ch[t]
     m.con_energy_balance = pyo.Constraint(m.T, rule=energy_balance_bat_rule, doc="Balance modificado de energía con BESS")
     
-    # Reserva operativa
     def reserve_bat_rule(model, t):
         unused_gen = sum(gen_params[g]['P_max'] * model.u[g, t] - model.p[g, t] for g in model.G)
         unused_grid = G_bar_red - model.g_red[t]
         return unused_gen + unused_grid >= res_t[t]
     m.con_reserve = pyo.Constraint(m.T, rule=reserve_bat_rule)
     
-    # Función Objetivo
     def objective_rule(model):
         costo_variables = sum(gen_params[g]['c_var'] * model.p[g, t] for g in model.G for t in model.T)
         costo_no_load = sum(gen_params[g]['c_nl'] * model.u[g, t] for g in model.G for t in model.T)

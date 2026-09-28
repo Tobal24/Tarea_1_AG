@@ -10,9 +10,7 @@ from generar_parametros import obtener_parametros_generadores, obtener_parametro
 
 
 def construir_modelo_base(datos_instancia):
-    """
-    Construye y retorna el modelo ConcreteModel de Pyomo para el caso base.
-    """
+
     gen_params = obtener_parametros_generadores()
     sys_params = obtener_parametros_sistema()
     
@@ -36,14 +34,12 @@ def construir_modelo_base(datos_instancia):
     m.p = pyo.Var(m.G, m.T, domain=pyo.NonNegativeReals, doc="Potencia generada en MW")
     m.g_red = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, G_bar_red), doc="Potencia importada de la red en MW")
     
-    # Restricciones
-    # 1. Lógica de arranque
+    # Rest
     def startup_rule(model, g, t):
         u_prev = gen_params[g]['u_0'] if t == 1 else model.u[g, t - 1]
         return model.v[g, t] >= model.u[g, t] - u_prev
     m.con_startup = pyo.Constraint(m.G, m.T, rule=startup_rule, doc="Activación de costo de arranque")
     
-    # 2. Límites técnicos de potencia
     def p_min_rule(model, g, t):
         return model.p[g, t] >= gen_params[g]['P_min'] * model.u[g, t]
     m.con_pmin = pyo.Constraint(m.G, m.T, rule=p_min_rule, doc="Límite de potencia mínima técnica")
@@ -52,7 +48,6 @@ def construir_modelo_base(datos_instancia):
         return model.p[g, t] <= gen_params[g]['P_max'] * model.u[g, t]
     m.con_pmax = pyo.Constraint(m.G, m.T, rule=p_max_rule, doc="Límite de potencia máxima técnica")
     
-    # 3. Rampas de subida y bajada (con ajuste al arranque/parada)
     def ramp_up_rule(model, g, t):
         p_prev = gen_params[g]['p_0'] if t == 1 else model.p[g, t - 1]
         u_prev = gen_params[g]['u_0'] if t == 1 else model.u[g, t - 1]
@@ -66,20 +61,16 @@ def construir_modelo_base(datos_instancia):
         return p_prev - model.p[g, t] <= gen_params[g]['R_g'] * model.u[g, t] + SD * (1 - model.u[g, t])
     m.con_ramp_down = pyo.Constraint(m.G, m.T, rule=ramp_down_rule, doc="Rampa máxima de bajada")
     
-    # 4. Balance de energía (cubrimiento de demanda horaria)
     def energy_balance_rule(model, t):
         return sum(model.p[g, t] for g in model.G) + model.g_red[t] == d_t[t]
     m.con_energy_balance = pyo.Constraint(m.T, rule=energy_balance_rule, doc="Balance instantáneo de energía")
     
-    # 5. Reserva operativa mínima
     def reserve_rule(model, t):
-        # Capacidad disponible no utilizada de unidades encendidas + importación no utilizada
         unused_gen = sum(gen_params[g]['P_max'] * model.u[g, t] - model.p[g, t] for g in model.G)
         unused_grid = G_bar_red - model.g_red[t]
         return unused_gen + unused_grid >= res_t[t]
     m.con_reserve = pyo.Constraint(m.T, rule=reserve_rule, doc="Requisito de reserva rodante/operativa")
     
-    # Función Objetivo: Minimizar costo total de operación semanal
     def objective_rule(model):
         costo_variables = sum(gen_params[g]['c_var'] * model.p[g, t] for g in model.G for t in model.T)
         costo_no_load = sum(gen_params[g]['c_nl'] * model.u[g, t] for g in model.G for t in model.T)
@@ -109,14 +100,11 @@ def extraer_resultados(modelo, datos_instancia):
     res_t = datos_instancia['res_t']
     
     total_cost = pyo.value(modelo.obj)
-    
-    # Costos desagregados
     c_var_total = sum(gen_params[g]['c_var'] * pyo.value(modelo.p[g, t]) for g in G for t in T)
     c_nl_total = sum(gen_params[g]['c_nl'] * pyo.value(modelo.u[g, t]) for g in G for t in T)
     c_start_total = sum(gen_params[g]['c_start'] * pyo.value(modelo.v[g, t]) for g in G for t in T)
     c_red_total = sum(lambda_t[t] * pyo.value(modelo.g_red[t]) for t in T)
     
-    # Generación y arranques por unidad
     unidades_stats = {}
     for g in G:
         gen_tot = sum(pyo.value(modelo.p[g, t]) for t in T)
@@ -141,7 +129,6 @@ def extraer_resultados(modelo, datos_instancia):
     grid_total_MWh = sum(pyo.value(modelo.g_red[t]) for t in T)
     grid_hours_used = sum(1 for t in T if pyo.value(modelo.g_red[t]) > 1e-3)
     
-    # Serie horaria completa
     hourly_records = []
     for t in T:
         rec = {

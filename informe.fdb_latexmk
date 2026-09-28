@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1790539957.25839 "c:/Users/cacor/OneDrive/Documentos/GIO/Tarea_1_AG/informe.tex" "informe.pdf" "informe" 1790539963.01362 0
-  "c:/Users/cacor/OneDrive/Documentos/GIO/Tarea_1_AG/informe.tex" 1790539953 43058 832d8657574d49b1e26aa13c6f8abd37 ""
+["pdflatex"] 1790566644.52998 "c:/Users/cacor/OneDrive/Documentos/GIO/Tarea_1_AG/informe.tex" "informe.pdf" "informe" 1790566649.7616 0
+  "c:/Users/cacor/OneDrive/Documentos/GIO/Tarea_1_AG/informe.tex" 1790566643 42046 7c21dd6fd2eba00d47fa5e40bec594ca ""
   "c:/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1782072999 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1782073785 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/tcbx0900.tfm" 1782073455 1536 ade15c5bf12fc415637ddf95fdc967b4 ""
@@ -151,12 +151,10 @@
   "figuras/fig_1d_despacho_base_sem_534.png" 1790219259 554977 199e77b6d98efa5d458f0037905193da ""
   "figuras/fig_2a_despacho_bateria_sem_534.png" 1790534393 638591 f3812ef0cb7a144da00e50e8b55d65b4 ""
   "figuras/fig_2a_operacion_bateria_sem_534.png" 1790219262 549786 570370c869afdbf2c529230b857f7061 ""
-  "figuras/fig_2b_demanda_curt_vs_cshed_sem_534.png" 1790219291 249938 76bfde01dd7aa0b1039c9b4aa4ebd60c ""
-  "figuras/fig_2c_emisiones_vs_F_sem_534.png" 1790219392 219535 e68e4c465fa16bff248eeb79a6b2ad36 ""
-  "informe.aux" 1790539962 9057 c3b0fbf918631d2aa6a535ab6a93d89d "pdflatex"
-  "informe.out" 1790539962 3800 4b3cf39e5dace0af1f8a1fe73c22f0f0 "pdflatex"
-  "informe.tex" 1790539953 43058 832d8657574d49b1e26aa13c6f8abd37 ""
-  "informe.toc" 1790539962 1468 d36757670dc5ec77a9c3f2bc4614aca5 "pdflatex"
+  "informe.aux" 1790566649 8227 25bdfba42eeae2df3c2433b074604846 "pdflatex"
+  "informe.out" 1790566649 3800 4b3cf39e5dace0af1f8a1fe73c22f0f0 "pdflatex"
+  "informe.tex" 1790566643 42046 7c21dd6fd2eba00d47fa5e40bec594ca ""
+  "informe.toc" 1790566649 1467 9f040c8f519b1f6f574ac48b7924266a "pdflatex"
   (generated)
   "informe.aux"
   "informe.log"

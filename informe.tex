@@ -242,7 +242,7 @@ Minimizar el costo total de operación del complejo industrial a lo largo de la 
         p_{g,t-1} - p_{g,t} &\le R_g \cdot u_{g,t} + SD_g \cdot (1 - u_{g,t}), \quad \forall g \in G, \, t \in T \label{eq:ramp_down}
     \end{align}
     (con $p_{g,0} = p_g^0$ y $u_{g,0} = u_g^0$). \\
-    \textit{Explicación:} Si la máquina está encendida en periodos consecutivos, la variación de potencia debe ser menor a $R_g$. Al arrancar, la potencia inicial queda acotada por $SU_g = \max(P_g^{min}, R_g)$; combinado con \eqref{eq:p_bounds}, esto permite a las turbinas de gas encender en su mínimo técnico ($P^{min}=40 > R_g=30$) ¿, y a los grupos diésel encender hasta $R_g$. Al detenerse ($u_{g,t}=0$), se exige que en la hora previa la máquina haya bajado a lo más a $SD_g$.
+    \textit{Explicación:} Si la máquina está encendida en periodos consecutivos, la variación de potencia debe ser menor a $R_g$. Al arrancar, la potencia inicial queda acotada por $SU_g = \max(P_g^{min}, R_g)$; combinado con \eqref{eq:p_bounds}, esto permite a las turbinas de gas encender en su mínimo técnico ($P^{min}=40 > R_g=30$), y a los grupos diésel encender hasta $R_g$. Al detenerse ($u_{g,t}=0$), se exige que en la hora previa la máquina haya bajado a lo más a $SD_g$.
     
     \item \textbf{Balance de Energía (Satisfacción de Demanda):}
     \begin{equation}
@@ -371,7 +371,7 @@ Se integró un sistema de almacenamiento con capacidad de energía $\bar{S} = 20
 \end{enumerate}
 
 \subsubsection*{Resultados y Análisis Comparativo con el Caso Base}
-En la Tabla \ref{tab:comparacion_bateria} y las Figuras \ref{fig:2a_despacho_bateria} y \ref{fig:2a_bateria} se sintetiza el impacto de la batería.
+En la Tabla \ref{tab:comparacion_bateria} se sintetiza el impacto de la batería.
 
 \begin{table}[H]
 \centering
@@ -435,7 +435,7 @@ Se implementó la variable de recorte $r_t \ge 0$ sujeta a la cota horaria $\bar
 \end{itemize}
 
 \subsubsection*{Evaluación Paramétrica y Determinación del Umbral Económico}
-En la Tabla \ref{tab:cshed_sweep} y la Figura \ref{fig:variaciones_sensibilidad}(a) se exhiben los resultados del barrido de $c^{shed}$.
+En la Tabla \ref{tab:cshed_sweep} se exhiben los resultados del barrido de $c^{shed}$.
 
 \begin{table}[H]
 \centering
@@ -496,7 +496,7 @@ Se introduce la variable binaria $y_d^{emiss} \in \{0, 1\}$, que indica si el d�
 \end{enumerate}
 
 \subsubsection*{Evaluación Paramétrica y Tipping Points de Cumplimiento}
-En la Tabla \ref{tab:F_sweep} y la Figura \ref{fig:variaciones_sensibilidad}(b) se reporta el barrido paramétrico de $F \in [0, 200.000.000]$ CLP/día.
+En la Tabla \ref{tab:F_sweep} se reporta el barrido paramétrico de $F \in [0, 200.000.000]$ CLP/día.
 
 \begin{table}[H]
 \centering
@@ -521,25 +521,6 @@ $F$ \textbf{[CLP/día]} & \textbf{Días Sobre Umbral} & \textbf{Costo Operativo 
 \bottomrule
 \end{tabular}
 \end{table}
-
-\begin{figure}[H]
-\centering
-\begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figuras/fig_2b_demanda_curt_vs_cshed_sem_534.png}
-    \caption{Curva de demanda interrumpible vs $c^{shed}$.}
-    \label{fig:2b_curt}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figuras/fig_2c_emisiones_vs_F_sem_534.png}
-    \caption{Días sobre umbral de emisiones vs penalización $F$.}
-    \label{fig:2c_F}
-\end{subfigure}
-\caption{Sensibilidad paramétrica para las variaciones 2.b (Carga Interrumpible) y 2.c (Penalización de Emisiones $F$).}
-\label{fig:variaciones_sensibilidad}
-\end{figure}
 
 \subsubsection*{Discusión de Implicancias Técnicas y Regulatorias}
 El comportamiento del sistema revela conclusiones de alto valor regulatorio:
@@ -573,7 +554,7 @@ El desarrollo computacional y analítico de la presente Tarea Computacional 1 ha
 \section{Anexo: Tablas de Datos Horarios y Verificación Numérica}
 \label{sec:anexo}
 
-En esta sección se presentan extractos tabulares de verificación de la solución óptima del Caso Base para las primeras 24 horas del horizonte semanal (Semilla 534), ratificando la satisfacción estricta de las restricciones de balance de potencia, rampas y reserva operativa mínima.
+En esta sección se presentan extractos tabulares de verificación de la solución óptima del Caso Base para las primeras 24 horas del horizonte semanal.
 
 \begin{table}[H]
 \centering
