@@ -73,7 +73,7 @@ def construir_modelo_bateria(datos_instancia):
     
     def energy_balance_bat_rule(model, t):
         return sum(model.p[g, t] for g in model.G) + model.g_red[t] + model.p_dis[t] == d_t[t] + model.p_ch[t]
-    m.con_energy_balance = pyo.Constraint(m.T, rule=energy_balance_bat_rule, doc="Balance modificado de energía con BESS")
+    m.con_energy_balance = pyo.Constraint(m.T, rule=energy_balance_bat_rule, doc="Balance modificado de energía con batería")
     
     def reserve_bat_rule(model, t):
         unused_gen = sum(gen_params[g]['P_max'] * model.u[g, t] - model.p[g, t] for g in model.G)

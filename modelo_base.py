@@ -1,8 +1,3 @@
-"""
-modelo_base.py
-Implementación en Pyomo del Modelo de Unit Commitment y Despacho Económico (Situación Inicial 1.b, 1.c, 1.d).
-Tarea Computacional 1 - ILN250 (2s26).
-"""
 
 import pyomo.environ as pyo
 import pandas as pd
